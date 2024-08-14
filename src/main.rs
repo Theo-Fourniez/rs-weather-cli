@@ -2,6 +2,58 @@
 //! Uses this API : https://www.prevision-meteo.ch/
 //! Documentation of the API : https://www.prevision-meteo.ch/uploads/pdf/recuperation-donnees-meteo.pdf
 use reqwest::{Client, Response, StatusCode};
+use serde::Deserialize;
+
+#[derive(Deserialize)]
+struct CityInfo {
+    name: String,
+    country: String,
+    latitude: String,
+    longitude: String,
+    elevation: String,
+    sunrise: String,
+    sunset: String,
+}
+
+#[derive(Deserialize)]
+struct ForecastInfo {
+    latitude: Option<f64>,
+    longitude: Option<f64>,
+    elevation: String,
+}
+
+#[derive(Deserialize)]
+struct CurrentCondition {
+    date: String,
+    hour: String,
+    tmp: i32,
+    wnd_spd: i32,
+    wnd_gust: i32,
+    wnd_dir: String,
+    pressure: f64,
+    humidity: i32,
+    condition: String,
+    condition_key: String,
+}
+
+#[derive(Deserialize)]
+struct FcstDay {
+    date: String,
+    day_short: String,
+    day_long: String,
+    tmin: i32,
+    tmax: i32,
+    condition: String,
+    condition_key: String,
+}
+
+#[derive(Deserialize)]
+struct WeatherData {
+    city_info: CityInfo,
+    forecast_info: ForecastInfo,
+    current_condition: CurrentCondition,
+    fcst_day_1: FcstDay,
+}
 
 #[tokio::main]
 async fn main() -> () {
@@ -38,20 +90,9 @@ async fn print_daily_weather_forecast(client: &Client, city: &str) -> () {
         "Response from weather API was not OK, was {}",
         &response.status()
     );
-    let response_json: serde_json::Value = response.json().await.unwrap();
-    let forecast_tomorrow = &response_json
-        .as_object()
-        .unwrap()
-        .get("fcst_day_1")
-        .unwrap();
-
-    let condition_tomorrow = forecast_tomorrow
-        .get("condition_key")
-        .unwrap()
-        .as_str()
-        .unwrap();
+    let weather_data: WeatherData = response.json().await.unwrap();
     println!(
         "Weather in {} will be {:?} tomorrow",
-        city, condition_tomorrow
+        weather_data.city_info.name, weather_data.fcst_day_1.condition
     )
 }
