@@ -2,58 +2,8 @@
 //! Uses this API : https://www.prevision-meteo.ch/
 //! Documentation of the API : https://www.prevision-meteo.ch/uploads/pdf/recuperation-donnees-meteo.pdf
 use reqwest::{Client, Response, StatusCode};
-use serde::Deserialize;
-
-#[derive(Deserialize)]
-struct CityInfo {
-    name: String,
-    country: String,
-    latitude: String,
-    longitude: String,
-    elevation: String,
-    sunrise: String,
-    sunset: String,
-}
-
-#[derive(Deserialize)]
-struct ForecastInfo {
-    latitude: Option<f64>,
-    longitude: Option<f64>,
-    elevation: String,
-}
-
-#[derive(Deserialize)]
-struct CurrentCondition {
-    date: String,
-    hour: String,
-    tmp: i32,
-    wnd_spd: i32,
-    wnd_gust: i32,
-    wnd_dir: String,
-    pressure: f64,
-    humidity: i32,
-    condition: String,
-    condition_key: String,
-}
-
-#[derive(Deserialize)]
-struct FcstDay {
-    date: String,
-    day_short: String,
-    day_long: String,
-    tmin: i32,
-    tmax: i32,
-    condition: String,
-    condition_key: String,
-}
-
-#[derive(Deserialize)]
-struct WeatherData {
-    city_info: CityInfo,
-    forecast_info: ForecastInfo,
-    current_condition: CurrentCondition,
-    fcst_day_1: FcstDay,
-}
+use weather_types::WeatherData;
+mod weather_types;
 
 #[tokio::main]
 async fn main() -> () {
