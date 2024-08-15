@@ -53,5 +53,9 @@ pub struct WeatherData {
     pub city_info: CityInfo,
     pub forecast_info: ForecastInfo,
     pub current_condition: CurrentCondition,
+    pub fcst_day_0: FcstDay,
     pub fcst_day_1: FcstDay,
+    pub fcst_day_2: FcstDay,
+    pub fcst_day_3: FcstDay,
+    pub fcst_day_4: FcstDay,
 }
