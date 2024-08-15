@@ -2,22 +2,22 @@ use clap::{command, Parser, Subcommand};
 
 use crate::CITIES;
 
-pub fn city_in_list_or_favorite(s: &str) -> Result<String, String> {
+pub fn city_in_list_or_favorite(s: &str) -> Result<CityNameOrFavorite, String> {
     if s == "favorite" {
-        return Ok(String::from(s));
+        return Ok(CityNameOrFavorite::Favorite);
     }
 
-    CITIES
+    return CITIES
         .iter()
         .find(|x| **x == s)
-        .map(|&x| String::from(x))
+        .map(|&x| CityNameOrFavorite::CityName(String::from(s)))
         .ok_or_else(|| {
             format!(
                 "City {} not in supported cities. Supported cities are : {} or favorite",
                 s,
                 CITIES.join(" ")
             )
-        })
+        });
 }
 #[derive(Debug, Parser)]
 #[command(
@@ -30,6 +30,12 @@ pub struct Cli {
     pub command: Commands,
 }
 
+#[derive(Debug, Clone)]
+pub enum CityNameOrFavorite {
+    CityName(String),
+    Favorite,
+}
+
 #[derive(Debug, Subcommand)]
 pub enum Commands {
     #[command(about = "Gets the weather forecast of a city")]
@@ -40,7 +46,7 @@ pub enum Commands {
             default_value = "favorite",
             value_parser = city_in_list_or_favorite
         )]
-        city: String,
+        city: CityNameOrFavorite,
         #[arg(
             help = "The day of the forecast to get (0 is today, 4 is the limit)", 
             required = false,

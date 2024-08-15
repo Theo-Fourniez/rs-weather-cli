@@ -29,9 +29,16 @@ async fn main() -> () {
     let parsed = Cli::parse();
     println!("parsed : {:?}", parsed);
     match parsed.command {
-        Commands::Get { city, day } => print_daily_weather_forecast(&client, &city).await,
+        Commands::Get { city, day } => match city {
+            cli::CityNameOrFavorite::CityName(city) => {
+                print_daily_weather_forecast(&client, &city).await
+            }
+            cli::CityNameOrFavorite::Favorite => {
+                println!("Getting the favorite city")
+            }
+        },
         Commands::Set { city_name } => {
-            println!("Setting the favorite city")
+            println!("Setting the favorite city as {}", city_name)
         }
     };
 }
