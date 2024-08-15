@@ -1,34 +1,65 @@
 //! An app that gets the daily forecast for 10 Belgian cities
 //! Uses this API : https://www.prevision-meteo.ch/
 //! Documentation of the API : https://www.prevision-meteo.ch/uploads/pdf/recuperation-donnees-meteo.pdf
+use clap::{arg, Parser, Subcommand};
 use reqwest::{Client, Response, StatusCode};
 use weather_types::WeatherData;
 mod weather_types;
+
+#[derive(Debug, Parser)]
+#[command(
+    name = "weather",
+    version = "1.0",
+    about = "A CLI to get the weather in Belgium"
+)]
+struct Cli {
+    #[command(subcommand)]
+    command: Commands,
+}
+
+#[derive(Debug, Subcommand)]
+enum Commands {
+    #[command(about = "Gets the weather forecast")]
+    Get {
+        #[arg(
+            help = "The city to get the weather from",
+            required = false,
+            default_value = "favorite"
+        )]
+        city: String,
+        #[arg(
+            help = "The day of the forecast to get (0 is today, 4 is the limit)", 
+            required = false,
+            short,
+            long,
+            value_parser = clap::value_parser!(u8).range(0..4),
+            default_value_t = 1
+        )]
+        day: u8,
+    },
+    #[command(about = "Sets your favorite city", arg_required_else_help(true))]
+    Set { city_name: String },
+}
+
+const CITIES: &[&str] = &[
+    "bruxelles-1",
+    "aalbeke",
+    "gent",
+    "beaumont",
+    "antwerpen-1",
+    "brugge",
+    "grivegnee-liege",
+    "hasselt",
+    "mons",
+    "namur",
+];
 
 #[tokio::main]
 async fn main() -> () {
     let client: Client = Client::new();
 
-    let cities = vec![
-        "bruxelles-1",
-        "aalbeke",
-        "gent",
-        "beaumont",
-        "antwerpen-1",
-        "brugge",
-        "grivegnee-liege",
-        "hasselt",
-        "mons",
-        "namur",
-    ];
-
-    println!(
-        "Getting the weather forecast for the Belgian cities : {} !",
-        cities.join(" ")
-    );
-    for city in cities {
-        print_daily_weather_forecast(&client, city).await; // Could have used reqwest blocking client
-    }
+    let parsed = Cli::parse();
+    println!("parsed : {:?}", parsed);
 }
 
 /// Prints the daily forecast of a city
