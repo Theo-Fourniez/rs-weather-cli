@@ -1,6 +1,7 @@
 use serde::Deserialize;
 
 #[derive(Deserialize)]
+#[allow(dead_code)]
 pub struct CityInfo {
     pub name: String,
     country: String,
@@ -12,14 +13,16 @@ pub struct CityInfo {
 }
 
 #[derive(Deserialize)]
-struct ForecastInfo {
+#[allow(dead_code)]
+pub struct ForecastInfo {
     latitude: Option<f64>,
     longitude: Option<f64>,
     elevation: String,
 }
 
 #[derive(Deserialize)]
-struct CurrentCondition {
+#[allow(dead_code)]
+pub struct CurrentCondition {
     date: String,
     hour: String,
     tmp: i32,
@@ -33,6 +36,7 @@ struct CurrentCondition {
 }
 
 #[derive(Deserialize)]
+#[allow(dead_code)]
 pub struct FcstDay {
     date: String,
     day_short: String,
@@ -44,6 +48,7 @@ pub struct FcstDay {
 }
 
 #[derive(Deserialize)]
+#[allow(dead_code)]
 pub struct WeatherData {
     pub city_info: CityInfo,
     pub forecast_info: ForecastInfo,
