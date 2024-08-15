@@ -31,7 +31,7 @@ async fn main() -> () {
     match parsed.command {
         Commands::Get { city, day } => match city {
             cli::CityNameOrFavorite::CityName(city) => {
-                print_daily_weather_forecast(&client, &city).await
+                print_daily_weather_forecast(&client, &city, day.into()).await
             }
             cli::CityNameOrFavorite::Favorite => {
                 println!("Getting the favorite city")
@@ -44,7 +44,7 @@ async fn main() -> () {
 }
 
 /// Prints the daily forecast of a city
-async fn print_daily_weather_forecast(client: &Client, city: &str) -> () {
+async fn print_daily_weather_forecast(client: &Client, city: &str, day: usize) -> () {
     let url = format!("https://www.prevision-meteo.ch/services/json/{}", city);
     let response: Response = client.get(&url).send().await.unwrap();
     assert!(
@@ -53,8 +53,18 @@ async fn print_daily_weather_forecast(client: &Client, city: &str) -> () {
         &response.status()
     );
     let weather_data: WeatherData = response.json().await.unwrap();
+    let forecasts = [
+        weather_data.fcst_day_0,
+        weather_data.fcst_day_1,
+        weather_data.fcst_day_2,
+        weather_data.fcst_day_3,
+        weather_data.fcst_day_4,
+    ];
+
+    let forecast = forecasts.get(day).expect("Forecast day out of range O..5");
+
     println!(
         "Weather in {} will be {:?} tomorrow",
-        weather_data.city_info.name, weather_data.fcst_day_1.condition
+        weather_data.city_info.name, forecast.condition
     )
 }
