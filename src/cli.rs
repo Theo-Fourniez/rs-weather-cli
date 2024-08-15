@@ -52,7 +52,7 @@ pub enum Commands {
             required = false,
             short,
             long,
-            value_parser = clap::value_parser!(u8).range(0..4),
+            value_parser = clap::value_parser!(u8).range(0..5),
             default_value_t = 1
         )]
         day: u8,
