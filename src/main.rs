@@ -6,6 +6,36 @@ use reqwest::{Client, Response, StatusCode};
 use weather_types::WeatherData;
 mod weather_types;
 
+const CITIES: [&str; 10] = [
+    "bruxelles-1",
+    "aalbeke",
+    "gent",
+    "beaumont",
+    "antwerpen-1",
+    "brugge",
+    "grivegnee-liege",
+    "hasselt",
+    "mons",
+    "namur",
+];
+
+fn city_in_list_or_favorite(s: &str) -> Result<String, String> {
+    if s == "favorite" {
+        return Ok(String::from(s));
+    }
+
+    CITIES
+        .iter()
+        .find(|x| **x == s)
+        .map(|&x| String::from(x))
+        .ok_or_else(|| {
+            format!(
+                "City {} not in supported cities. Supported cities are : {} or favorite",
+                s,
+                CITIES.join(" ")
+            )
+        })
+}
 #[derive(Debug, Parser)]
 #[command(
     name = "weather",
@@ -19,12 +49,13 @@ struct Cli {
 
 #[derive(Debug, Subcommand)]
 enum Commands {
-    #[command(about = "Gets the weather forecast")]
+    #[command(about = "Gets the weather forecast of a city")]
     Get {
         #[arg(
             help = "The city to get the weather from",
             required = false,
-            default_value = "favorite"
+            default_value = "favorite",
+            value_parser = city_in_list_or_favorite
         )]
         city: String,
         #[arg(
@@ -38,21 +69,11 @@ enum Commands {
         day: u8,
     },
     #[command(about = "Sets your favorite city", arg_required_else_help(true))]
-    Set { city_name: String },
+    Set {
+        #[arg(help = "The name of your favorite city")]
+        city_name: String,
+    },
 }
-
-const CITIES: &[&str] = &[
-    "bruxelles-1",
-    "aalbeke",
-    "gent",
-    "beaumont",
-    "antwerpen-1",
-    "brugge",
-    "grivegnee-liege",
-    "hasselt",
-    "mons",
-    "namur",
-];
 
 #[tokio::main]
 async fn main() -> () {
