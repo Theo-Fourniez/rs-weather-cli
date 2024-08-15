@@ -10,7 +10,7 @@ pub fn city_in_list_or_favorite(s: &str) -> Result<CityNameOrFavorite, String> {
     return CITIES
         .iter()
         .find(|x| **x == s)
-        .map(|&x| CityNameOrFavorite::CityName(String::from(s)))
+        .map(|&_x| CityNameOrFavorite::CityName(String::from(s)))
         .ok_or_else(|| {
             format!(
                 "City {} not in supported cities. Supported cities are : {} or favorite",
