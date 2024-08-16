@@ -5,10 +5,12 @@ use std::{fmt::Display, process::exit};
 
 use clap::Parser;
 use cli::{Cli, Commands};
+use favorite_city::{get_favorite_city, set_favorite_city};
 use reqwest::{Client, Response, StatusCode};
 use weather_types::WeatherData;
 
 mod cli;
+mod favorite_city;
 mod weather_types;
 
 const CITIES: [&str; 10] = [
@@ -29,7 +31,6 @@ async fn main() -> () {
     let client: Client = Client::new();
 
     let parsed = Cli::parse();
-    println!("parsed : {:?}", parsed);
     match parsed.command {
         Commands::Get { city, day } => match city {
             cli::CityNameOrFavorite::CityName(city) => {
@@ -39,11 +40,14 @@ async fn main() -> () {
                 exit(-1);
             }
             cli::CityNameOrFavorite::Favorite => {
-                println!("Getting the favorite city")
+                print_daily_weather_forecast(&client, get_favorite_city().as_str(), day.into())
+                    .await
+                    .unwrap_or_else(|x| println!("Forecast API error : {}", x));
+                exit(-1);
             }
         },
         Commands::Set { city_name } => {
-            println!("Setting the favorite city as {}", city_name)
+            set_favorite_city(city_name);
         }
     };
 }
