@@ -44,30 +44,24 @@ pub fn set_favorite_city(city_name: String) {
     }
 }
 
-mod utils {
-    use std::fs;
-
-    use directories::ProjectDirs;
-
-    pub(crate) fn delete_favorite_config_file_and_dir() -> () {
-        if let Some(proj_dirs) = ProjectDirs::from("com", "Decathlon", "Weather App") {
-            let config_dir = proj_dirs.config_dir();
-            let _ = fs::remove_dir_all(config_dir);
-        }
-    }
-
-    pub(crate) fn create_favorite_config_folder() -> () {
-        if let Some(proj_dirs) = ProjectDirs::from("com", "Decathlon", "Weather App") {
-            let config_dir = proj_dirs.config_dir();
-            fs::create_dir_all(&config_dir).expect("Failed to create config directory");
-        }
-    }
-}
 #[cfg(test)]
 mod test {
-    use crate::favorite_city::{
-        get_favorite_city, set_favorite_city, utils::delete_favorite_config_file_and_dir,
-    };
+    use utils::delete_favorite_config_file_and_dir;
+
+    use crate::favorite_city::{get_favorite_city, set_favorite_city};
+
+    mod utils {
+        use std::fs;
+
+        use directories::ProjectDirs;
+
+        pub(crate) fn delete_favorite_config_file_and_dir() -> () {
+            if let Some(proj_dirs) = ProjectDirs::from("com", "Decathlon", "Weather App") {
+                let config_dir = proj_dirs.config_dir();
+                let _ = fs::remove_dir_all(config_dir);
+            }
+        }
+    }
 
     #[test]
     pub fn test_setting_getting_favorite_city() {
