@@ -1,6 +1,8 @@
 //! An app that gets the daily forecast for 10 Belgian cities
 //! Uses this API : https://www.prevision-meteo.ch/
 //! Documentation of the API : https://www.prevision-meteo.ch/uploads/pdf/recuperation-donnees-meteo.pdf
+use std::{fmt::Display, process::exit};
+
 use clap::Parser;
 use cli::{Cli, Commands};
 use reqwest::{Client, Response, StatusCode};
@@ -31,7 +33,10 @@ async fn main() -> () {
     match parsed.command {
         Commands::Get { city, day } => match city {
             cli::CityNameOrFavorite::CityName(city) => {
-                print_daily_weather_forecast(&client, &city, day.into()).await
+                print_daily_weather_forecast(&client, &city, day.into())
+                    .await
+                    .unwrap_or_else(|x| println!("Forecast API error : {}", x));
+                exit(-1);
             }
             cli::CityNameOrFavorite::Favorite => {
                 println!("Getting the favorite city")
@@ -43,8 +48,30 @@ async fn main() -> () {
     };
 }
 
+enum ForecastApiError {
+    CityNotFound(String),
+    ForecastDayOutOfRange,
+}
+
+impl Display for ForecastApiError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match &self {
+            ForecastApiError::CityNotFound(city) => {
+                write!(f, "City {} not found when calling the forecast API", city)
+            }
+            ForecastApiError::ForecastDayOutOfRange => {
+                write!(f, "Day not supported by the forecast API")
+            }
+        }
+    }
+}
+
 /// Prints the daily forecast of a city
-async fn print_daily_weather_forecast(client: &Client, city: &str, day: usize) -> () {
+async fn print_daily_weather_forecast(
+    client: &Client,
+    city: &str,
+    day: usize,
+) -> Result<(), ForecastApiError> {
     let url = format!("https://www.prevision-meteo.ch/services/json/{}", city);
     let response: Response = client.get(&url).send().await.unwrap();
     assert!(
@@ -52,7 +79,15 @@ async fn print_daily_weather_forecast(client: &Client, city: &str, day: usize) -
         "Response from weather API was not OK, was {}",
         &response.status()
     );
-    let weather_data: WeatherData = response.json().await.unwrap();
+    if day > 5 {
+        return Err(ForecastApiError::ForecastDayOutOfRange);
+    }
+
+    let weather_data: WeatherData = response
+        .json::<WeatherData>()
+        .await
+        .map_err(|_err| ForecastApiError::CityNotFound(city.into()))?;
+
     let forecasts = [
         weather_data.fcst_day_0,
         weather_data.fcst_day_1,
@@ -61,10 +96,11 @@ async fn print_daily_weather_forecast(client: &Client, city: &str, day: usize) -
         weather_data.fcst_day_4,
     ];
 
-    let forecast = forecasts.get(day).expect("Forecast day out of range O..5");
+    let forecast = forecasts.get(day).expect("Forecast day out of range 0..5");
 
     println!(
         "Weather in {} will be {:?} tomorrow",
         weather_data.city_info.name, forecast.condition
-    )
+    );
+    Ok(())
 }
