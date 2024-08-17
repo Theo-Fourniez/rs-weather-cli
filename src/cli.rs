@@ -38,7 +38,7 @@ pub enum CityNameOrFavorite {
 
 #[derive(Debug, Subcommand)]
 pub enum Commands {
-    #[command(about = "Gets the weather forecast of a city")]
+    #[command(about = "Gets the weather forecast of a city or of the favorite city")]
     Get {
         #[arg(
             help = "The city to get the weather from",
