@@ -13,3 +13,9 @@ Options:
   -h, --help     Print help
   -V, --version  Print version
 ```
+
+## Features : 
+* Getting the forecast of a predifined city 
+* Getting the forecast of your favorite city
+* Specifying the day of which you want to get the forecast (between 1 being tomorrow and 5 being in 5 days)
+* Setting a favorite city
