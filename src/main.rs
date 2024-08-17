@@ -7,7 +7,7 @@ use clap::Parser;
 use cli::{Cli, Commands};
 use favorite_city::{get_favorite_city, set_favorite_city};
 use reqwest::{Client, Response, StatusCode};
-use weather_types::WeatherData;
+use weather_types::{WeatherConditions, WeatherData};
 
 mod cli;
 mod favorite_city;
@@ -103,8 +103,11 @@ async fn print_daily_weather_forecast(
     let forecast = forecasts.get(day).expect("Forecast day out of range 0..5");
 
     println!(
-        "Weather in {} will be {:?} tomorrow",
-        weather_data.city_info.name, forecast.condition
+        "Weather in {} will be {} {}  in {} days",
+        weather_data.city_info.name,
+        forecast.condition,
+        WeatherConditions::from(forecast.condition_key.as_str()),
+        day
     );
     Ok(())
 }
