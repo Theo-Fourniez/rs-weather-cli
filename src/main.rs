@@ -1,4 +1,4 @@
-//! An app that gets the daily forecast for 10 Belgian cities
+//! A CLI app to get the weather in predifined cities aswell as in a city you can choose (favorite)
 //! Uses this API : https://www.prevision-meteo.ch/
 //! Documentation of the API : https://www.prevision-meteo.ch/uploads/pdf/recuperation-donnees-meteo.pdf
 use std::{fmt::Display, process::exit};
